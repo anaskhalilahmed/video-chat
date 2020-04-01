@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+
+</head>
+<body onload="display()">
+
+    <input type="text"  id="connect" placeholder="enter the other peer id which you want to connect"><br>
+    <button onclick="func()">OK</button>
+    <p id="demo"></p>
+    <p id="mydemo"></p>
+    <video id="vid" autoplay controls></video>
+    <script>
+
+
+
+var peer=new Peer();
+
+peer.on('open',function(id){
+    console.log(id);
+document.getElementById("demo").innerHTML="your id is"+id;
+});
+
+
+peer.on('disconnected',function(){
+// var a=peer.length;
+localStorage.removeItem("peerid");
+});
+
+//call 
+
+function func(){
+    var a=document.getElementById("connect").value;
+    localStorage.setItem("peerid",a);
+    location.reload();
+}
+
+function display(){
+var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+if(getUserMedia){
+    navigator.getUserMedia({video: true, audio: true}, function(stream) {
+    var call = peer.call(localStorage.getItem("peerid"), stream);
+call.on('stream', function(remoteStream) {
+// Show stream in some video/canvas element.
+var a=document.getElementById("vid");
+a.srcObject=remoteStream;
+a.play();
+});
+}, function(err) {
+console.log('Failed to get local stream' ,err);
+});
+}
+//Answer
+var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+peer.on('call', function(call) {
+    if(getUserMedia){
+navigator.getUserMedia({video: true, audio: true}, function(stream) {
+call.answer(stream); // Answer the call with an A/V stream.
+call.on('stream', function(remoteStream) {
+// Show stream in some video/canvas element.
+var a=document.getElementById("vid");
+a.srcObject=remoteStream;
+a.play();
+});
+}, function(err) {
+console.log('Failed to get local stream' ,err);
+});
+}
+});
+}
+
+
+
+
+
+
+    </script>
+</body>
+</html>
